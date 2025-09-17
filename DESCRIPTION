@@ -1,0 +1,26 @@
+Package: TLR
+Type: Package
+Title: Tools for Targeted Likelihood Regression
+Version: 0.1.0
+Authors@R: 
+    c(
+      person("Yuzhou", "Lin", email = "you@example.com", role = c("aut", "cre"))
+    )
+Description: Functions for targeted likelihood regression and 
+    related methods. Supports data manipulation, visualization, 
+    and local false discovery rate analysis.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    dplyr,
+    ggplot2,
+    locfdr,
+    HDMT
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Config/testthat/edition: 3
