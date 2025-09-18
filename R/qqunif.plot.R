@@ -1,4 +1,3 @@
-
 qqunif.plot<-function(pvalues,
                       should.thin=T, thin.obs.places=2, thin.exp.places=2,
                       xlab=expression(paste("Expected (",-log[10],~p[beta[j]],")")),

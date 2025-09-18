@@ -1,5 +1,3 @@
-
-
 p_value_underH1 = function(input_pvalues, alpha1, alpha2, verbose = FALSE) {
 
   # input_pvalues contains two columns.

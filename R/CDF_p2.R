@@ -1,5 +1,3 @@
-
-
 CDF_p2 = function(df_min, df_max){
   len_x = 1e5
   max_df_prod = df_max * 2

@@ -1,6 +1,3 @@
-
-
-# Define the AS method based on the provided description
 adaptive_bh_as <- function(p_values, q, delta = 0.01) {
   n <- length(p_values)
 

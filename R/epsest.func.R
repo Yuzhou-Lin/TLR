@@ -1,5 +1,3 @@
-
-
 epsest.func <- function(x,u,sigma){
   # x is a vector
   # u is the mean

@@ -1,5 +1,3 @@
-
-
 TLR = function(p.M,p.Y,estws,coefs,coefs2,significance_upper,control.method,ifcond){
   sim.num <- length(p.M)
 

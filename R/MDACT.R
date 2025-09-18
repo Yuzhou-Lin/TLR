@@ -1,5 +1,3 @@
-
-
 MDACT = function(p.M,p.Y,estws,significance_upper,control.method,ifcond){
   sim.num <- length(p.M)
 

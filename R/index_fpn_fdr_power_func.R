@@ -1,5 +1,3 @@
-
-
 index_fpn_fdr_power_func <- function(sat_index,true_set){
   if(length(true_set)==0){
     fpn <- ifelse(length(sat_index)>0,1,0)

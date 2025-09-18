@@ -1,7 +1,3 @@
-
-
-# Bisection method to find the largest t such that F_emp(t) <= significance_upper
-# Define the search function using sorted index
 search_sorted_index <- function(F_emp, Ts, control.method,significance_upper) {
 
   sorted_index <- order(Ts) # Get the indices that sort 'Ts'

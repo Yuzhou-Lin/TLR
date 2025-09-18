@@ -1,5 +1,3 @@
-
-
 TLR_pvalues = function(p.M,p.Y,estws,coefs,coefs2){
   sim.num <- length(p.M)
 

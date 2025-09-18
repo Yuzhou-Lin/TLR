@@ -1,6 +1,3 @@
-
-
-# Function to reset temporary directory for each replication
 reset_temp_dir <- function(tempdir_path) {
   # If the directory exists, delete it
   if (dir.exists(tempdir_path)) {

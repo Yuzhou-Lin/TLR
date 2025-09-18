@@ -1,5 +1,3 @@
-
-
 generate_pvalues_indp_from_norm <- function(sim.num,ws,m,delta){
   pras <- c(m/sqrt(1+delta^2),m/sqrt(1+delta^2)*delta)
   combinations <- as.matrix(expand.grid(rep(list(c(0, 1)),2)))[c(2,3,1,4),]

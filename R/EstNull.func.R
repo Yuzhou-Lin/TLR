@@ -1,5 +1,3 @@
-
-
 EstNull.func<-function (x,gamma=0.1){
   # x is a vector of z-values
   # gamma is a parameter, default is 0.1

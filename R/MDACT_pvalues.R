@@ -1,5 +1,3 @@
-
-
 MDACT_pvalues = function(p.M,p.Y,estws){
   sim.num <- length(p.M)
 

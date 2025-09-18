@@ -1,5 +1,3 @@
-
-
 TLR_thre <- function(p.M, p.Y,coefs,coefs2,pi.10.est,pi.01.est,pi.00.est,significance_upper,control.method,ifcond){
   sim.num <- length(p.M)
   c <- pi.01.est + pi.10.est + pi.00.est
