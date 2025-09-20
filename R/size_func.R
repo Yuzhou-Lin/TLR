@@ -1,3 +1,5 @@
+`%!in%` <- Negate(`%in%`)
+
 size_func <- function(sat_index,true_set,sim.num){
   if(length(true_set)==0){
     fpn <- length(sat_index)
@@ -8,3 +10,4 @@ size_func <- function(sat_index,true_set,sim.num){
     return(c(size,power))
   }
 }
+
