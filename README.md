@@ -18,7 +18,7 @@ install_github("Yuzhou-Lin/TLR")
 
 ## Implementation
 
-For detailed instructions on implementing TLR for mediation testing, see the file Rmarkdown-for-TLR.html under the "notes" folder.
+For detailed, step-by-step guidance on implementing TLR for mediation testing, download and open notes/Rmarkdown-for-TLR.html in your browser. 
 
 
 
