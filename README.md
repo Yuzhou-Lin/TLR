@@ -14,3 +14,11 @@ You can install the development version of **TLR** from GitHub with:
 # install.packages("devtools")   # if you don’t have devtools
 library(devtools)
 install_github("Yuzhou-Lin/TLR")
+```
+
+## Implementation
+
+For detailed instructions on implementing TLR for mediation testing, see the file Rmarkdown-for-TLR.html under the "notes" folder.
+
+
+

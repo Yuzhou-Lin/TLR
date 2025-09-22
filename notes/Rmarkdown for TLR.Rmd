@@ -1,0 +1,261 @@
+---
+title: "Rmarkdown for Tail Likelihood Ratio Method"
+output: html_document
+author: "Haoyu Yang, Ruoyu Wang, Yuzhou Lin, and Xihong Lin"
+---
+
+
+## Description
+
+TLR is an R package designed to implement the Tail Likelihood Ratio Method for testing a large number of mediation effects in epigenome-wide studies.
+
+
+## Installation
+
+You can install the development version of **TLR** from GitHub with
+```{r}
+# install.packages("devtools")   # if you don’t have devtools
+library(devtools)
+install_github("Yuzhou-Lin/TLR")
+```
+
+Then you can load the TLR library with
+```{r}
+library(TLR)
+```
+
+
+
+## Set basic parameters
+
+We set the significance level to be 0.05, the number of tests (mediators) to be 480,000, the number of repetitions for calculating FDR and power to be 100. We further set the proportions for Case $\gamma0$, Case $0\beta$,  Case $00$, and Case $\gamma\beta$ to be (0.015, 0.130, 0.850, 0.005). We generate our cases based on this proportion set. 
+
+```{r cars}
+set.seed(520)
+
+sim.num=480000
+sig_level=0.05
+num_runs=100
+
+ws <- rep(NA,4)
+ws[1] <- 0.015 # Case \gamma0
+ws[2] <- 0.130 # Case 0\beta
+ws[3] <- 0.850 # Case 00
+ws[4] <- 0.005 # Case \gamma\beta
+
+
+ws <- ws
+case <- rep(NA,sim.num)
+for (i in c(1:sim.num)) {
+  if (i <= sim.num*ws[1]) {
+    case[i] <- "10"
+  } else if (i <= sim.num*(ws[1]+ws[2])) {
+    case[i] <- "01"
+  } else if (i <= sim.num*(ws[1]+ws[2]+ws[3])) {
+    case[i] <- "00"
+  } else {
+    case[i] <- "11"
+  }
+}
+
+```
+
+
+## Generate p-values
+
+To generate $p_{\gamma_j}$ and $p_{\beta_j}$ for $j = 1, \dots, 480000$, we draw their $z$-statistics as
+
+$$
+z_{\gamma_j} \sim
+\begin{cases}
+N(3,\,9), & \text{if } \gamma_j \neq 0, \\[0.5ex]
+N(0,\,1), & \text{if } \gamma_j = 0,
+\end{cases}
+\qquad
+z_{\beta_j} \sim
+\begin{cases}
+N(5,\,4), & \text{if } \beta_j \neq 0, \\[0.5ex]
+N(0,\,1), & \text{if } \beta_j = 0.
+\end{cases}
+$$
+
+
+```{r}
+
+Z.M_para=c(3,3)
+Z.Y_para=c(5,2)
+
+Z.M <- rep(NA,sim.num)
+Z.Y <- rep(NA,sim.num)
+
+for (i in c(1:sim.num)) {
+  if (case[i]=="10" | case[i]=="11") {
+    Z.M[i] <- rnorm(1,mean=Z.M_para[1],sd=Z.M_para[2])
+  } else {
+    Z.M[i] <- rnorm(1,mean=0,sd=1)
+  }
+}
+
+for (i in c(1:sim.num)) {
+  if (case[i]=="01" | case[i]=="11") {
+    Z.Y[i] <- rnorm(1,mean=Z.Y_para[1],sd=Z.Y_para[2])
+  } else {
+    Z.Y[i] <- rnorm(1,mean=0,sd=1)
+  }
+}
+```
+
+
+Then we transform $z_{\gamma_j}$ and $z_{\beta_j}$ to $p_{\gamma_j}$ and $p_{\beta_j}$. 
+
+```{r}
+p.M <- 2*(1-pnorm(abs(Z.M)))
+p.Y <- 2*(1-pnorm(abs(Z.Y)))
+
+p.M[p.M==0] <- 1e-17
+p.Y[p.Y==0] <- 1e-17
+```
+
+
+## Estimate the proportions
+
+```{r}
+estws <- list()
+estws$alpha1 <- adaptive_bh_as(p.M,0.05)$pi_hat_opt
+estws$alpha2 <- adaptive_bh_as(p.Y,0.05)$pi_hat_opt
+
+print(paste0(
+  "pi_{gamma0} = ", round((1-estws$alpha1)*estws$alpha2,4),
+  ",  pi_{0beta} = ", round(estws$alpha1*(1-estws$alpha2),4),
+  ",  pi_{00} = ", round(estws$alpha1*estws$alpha2,4),
+  ",  pi_{gamma beta} = ",
+  round((1-estws$alpha1)*(1-estws$alpha2),4)
+))
+```
+
+
+## Implement TLR
+
+We estimate the parameters for the tail likelihood ratio statistics.
+
+```{r}
+k=10
+tail_est <- alphas_estimate_tail(cbind(p.M,p.Y),estws,k*sqrt(sim.num))
+coefs <- tail_est[1:2]
+coefs2 <- tail_est[3:4]
+```
+
+
+We implement TLR given the p-values, the estimated proportions, and the estimated TLR parameters. We then check the FDP and power for this single simulation.
+
+```{r}
+index_TLR <- TLR(p.M,p.Y,estws,coefs,coefs2,significance_upper = sig_level,control.method="FDR",ifcond = 1)
+
+true_set <- which(case=="11")
+result_tab <- index_fpn_fdr_power_func(index_TLR,true_set)
+result_tab <- matrix(result_tab,1,2)
+print(paste("FDP is", result_tab[1, 1]))
+print(paste("Power is", result_tab[1, 2]))
+```
+
+
+
+## Calculate the average FDR and power for TLR using many replications.
+
+We replicate our simulations 100 times and calculate the average FDR and average power.
+
+```{r}
+
+SizePowerSim = function(ws,Z.M_para,Z.Y_para,sim.num,sig_level){
+  
+    ws <- ws
+    case <- rep(NA,sim.num)
+    for (i in c(1:sim.num)) {
+      if (i <= sim.num*ws[1]) {
+        case[i] <- "10"
+      } else if (i <= sim.num*(ws[1]+ws[2])) {
+        case[i] <- "01"
+      } else if (i <= sim.num*(ws[1]+ws[2]+ws[3])) {
+        case[i] <- "00"
+      } else {
+        case[i] <- "11"
+      }
+    }
+        
+    
+    Z.M <- rep(NA,sim.num)
+    Z.Y <- rep(NA,sim.num)
+    
+    for (i in c(1:sim.num)) {
+      if (case[i]=="10" | case[i]=="11") {
+        Z.M[i] <- rnorm(1,mean=Z.M_para[1],sd=Z.M_para[2])
+      } else {
+        Z.M[i] <- rnorm(1,mean=0,sd=1)
+      }
+    }
+    
+    for (i in c(1:sim.num)) {
+      if (case[i]=="01" | case[i]=="11") {
+        Z.Y[i] <- rnorm(1,mean=Z.Y_para[1],sd=Z.Y_para[2])
+      } else {
+        Z.Y[i] <- rnorm(1,mean=0,sd=1)
+      }
+    }
+    
+    
+    p.M <- 2*(1-pnorm(abs(Z.M)))
+    p.Y <- 2*(1-pnorm(abs(Z.Y)))
+    
+    p.M[p.M==0] <- 1e-17
+    p.Y[p.Y==0] <- 1e-17
+    
+    
+    estws <- list()
+    estws$alpha1 <- adaptive_bh_as(p.M,0.05)$pi_hat_opt
+    estws$alpha2 <- adaptive_bh_as(p.Y,0.05)$pi_hat_opt
+    
+    
+    k=10
+    tail_est <- alphas_estimate_tail(cbind(p.M,p.Y),estws,k*sqrt(sim.num))
+    coefs <- tail_est[1:2]
+    coefs2 <- tail_est[3:4]
+    
+    
+    true_set <- which(case=="11")
+    index_TLR <- TLR(p.M,p.Y,estws,coefs,coefs2,significance_upper = sig_level,control.method="FDR",ifcond = 1)
+    result_tab <- index_fpn_fdr_power_func(index_TLR,true_set)
+    result_tab <- matrix(result_tab,1,2)
+    
+    estwsp <- c(estws$alpha10,estws$alpha01,estws$alpha00,1-sum(estws$alpha10+estws$alpha01+estws$alpha00))
+    
+    return(list(result_tab=result_tab,ws=ws,estwsp=estwsp))
+}
+
+
+
+
+
+sim_results <- lapply(seq_len(num_runs), function(i) {
+  SizePowerSim(ws, Z.M_para, Z.Y_para, sim.num, sig_level)
+})
+
+sim_results_table <- vector("list", num_runs)
+estwsp <- matrix(NA_real_, num_runs, 4)
+ws_mat <- matrix(NA_real_, num_runs, 4)
+
+for (i in seq_len(num_runs)) {
+  sim_results_table[[i]] <- sim_results[[i]]$result_tab
+  estwsp[i, ] <- sim_results[[i]]$estwsp
+  ws_mat[i, ] <- sim_results[[i]]$ws
+}
+
+
+average_tab <- apply(array(sapply(sim_results_table, function(x) x), dim = c(1, 2, num_runs)), c(1, 2), mean)
+
+rownames(average_tab) <- c("TLR")
+colnames(average_tab) <- c("average FDP","average power")
+average_tab
+```
+
+
+
