@@ -9,7 +9,7 @@ alphas_estimate_tail <- function(X,estws,m0){
   r2 <- sort(X[, 2])[m0]
 
   solve.alpha <- function(x) {
-    sum(log(X[X[, 1] <= r1, 1])) / m - min(0.996, nullprop$alpha1) * (r1*log(r1)-r1) - ((m0 / m  - r1 * nullprop$alpha1) / r1^{x} / (1 - nullprop$alpha1))*(1 - min(0.996, nullprop$alpha1)) * (r1^{x} * log(r1) - x^{-1} * r1^{x})
+    sum(log(X[X[, 1] <= r1, 1])) / m - min(0.99, nullprop$alpha1) * (r1*log(r1)-r1) - ((m0 / m  - r1 * nullprop$alpha1) / r1^{x} / (1 - nullprop$alpha1))*(1 - min(0.996, nullprop$alpha1)) * (r1^{x} * log(r1) - x^{-1} * r1^{x})
   }
 
   alpha1_hat <- try(uniroot(solve.alpha, c(1e-3, 1))$root, silent = TRUE)
