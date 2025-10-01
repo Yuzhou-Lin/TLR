@@ -24,3 +24,4 @@ alphas_estimate_tail <- function(X,estws,m0){
 
   return(c(alpha1_hat,alpha2_hat, C1, C2))
 }
+
